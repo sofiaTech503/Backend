@@ -1,54 +1,36 @@
-// IMPORTAÇÕES ESSENCIAIS
-const express = require('express');
-const cors = require('cors');
-// Supondo que você use body-parser ou o express nativo para JSON
-const bodyParser = require('body-parser'); 
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+
+
+import crmRoutes from "./routes/crmRoutes.js";
+import vendasRoutes from "./routes/vendasRoutes.js";
+import estoqueRoutes from './routes/estoqueRoutes.js';
+import rhRoutes from "./routes/rhRoutes.js";
+import financeiroRoutes from "./routes/financeiroRoutes.js";
+import configuracoesRoutes from "./routes/configuracoesRoutes.js";
+
+dotenv.config();
 const app = express();
-const port = process.env.PORT || 3000;
+app.use(cors());
+app.use(express.json());
 
-// Importação das rotas (Exemplo baseado na sua estrutura 'routes')
-const vendasRoutes = require('./routes/vendasRoutes');
-// ... importe outras rotas (crmRoutes, estoqueRoutes, etc.)
-
-// =======================================================
-// 1. CONFIGURAÇÃO DE MIDDLEWARES GLOBAIS (INCLUINDO CORS)
-// =======================================================
-
-// A URL EXATA do seu frontend no Vercel (baseado no seu screenshot)
-const VERCEL_FRONTEND_URL = 'https://sofia-tech-frontend.vercel.app'; 
-
-// --- CONFIGURAÇÃO DO CORS ---
-// Isso deve ser o primeiro middleware para interceptar todas as requisições.
-app.use(cors({
-  origin: VERCEL_FRONTEND_URL, // Permite requisições APENAS do seu frontend no Vercel
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true // Necessário se houver uso de cookies ou sessões de autenticação
-}));
-
-// Middlewares para processar requisições
-app.use(bodyParser.json());
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true }));
-
-// =======================================================
-// 2. DEFINIÇÃO DAS ROTAS DA API
-// =======================================================
-
-// Rota de teste/inicial
+// Rota de teste simples para o endereço raiz (/)
 app.get('/', (req, res) => {
-  res.json({ message: "API SofiaTech rodando e CORS configurado!", status: "online" });
+    res.json({
+        message: '🚀 API SofiaTech está rodando!',
+        documentation: 'Acesse /api/[modulo] para endpoints específicos.',
+        status: 'online'
+    });
 });
 
-// Suas rotas específicas, utilizando os módulos de rotas
-app.use('/api/vendas', vendasRoutes); 
-// app.use('/api/crm', crmRoutes);
-// app.use('/api/estoque', estoqueRoutes);
-// ... Adicione as demais rotas aqui
+// Rotas principais
+app.use("/api/crm", crmRoutes);
+app.use("/api/vendas", vendasRoutes);
+app.use("/api/estoque", estoqueRoutes);
+app.use("/api/rh", rhRoutes);
+app.use("/api/financeiro", financeiroRoutes);
+app.use("/api/configuracoes", configuracoesRoutes);
 
-// =======================================================
-// 3. INICIALIZAÇÃO DO SERVIDOR
-// =======================================================
-
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
-});
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
