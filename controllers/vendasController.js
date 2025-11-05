@@ -1,21 +1,59 @@
-// Supondo que o seu model se conecta ao DB e busca os dados
-const vendasModel = require('../models/vendasModel'); 
+import Venda from "../models/vendasModel.js";
+import connection from "../config/db.js";
 
-exports.getVendasMensais = async (req, res) => {
+// Criar nova venda
+export const criarVenda = async (req, res) => {
   try {
-    // 1. CHAMA O MODEL PARA INTERAGIR COM O BANCO DE DADOS
-    const dadosVendas = await vendasModel.buscarVendasMensais(); 
-    
-    // 2. RETORNA OS DADOS FORMATADOS PARA O FRONTEND
-    // O formato deve ser o que o seu gráfico espera (ex: {mes: 'Mai', valor: 9000})
-    res.status(200).json(dadosVendas); 
-
+    const novaVenda = await Venda.create(req.body);
+    res.status(201).json(novaVenda);
   } catch (error) {
-    console.error("Erro no Controller de Vendas Mensais:", error);
-    // 3. TRATAMENTO DE ERRO
-    res.status(500).json({ 
-        message: "Erro interno do servidor ao buscar vendas.", 
-        error: error.message 
-    });
+    res.status(500).json({ message: "Erro ao criar venda", error });
+  }
+};
+
+// Listar todas as vendas
+export const listarVendas = async (_req, res) => {
+  try {
+    const vendas = await Venda.findAll();
+    res.json(vendas);
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao listar vendas", error });
+  }
+};
+
+// Buscar venda específica
+export const buscarVenda = async (req, res) => {
+  try {
+    const venda = await Venda.findByPk(req.params.id);
+    if (!venda) return res.status(404).json({ message: "Venda não encontrada" });
+    res.json(venda);
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao buscar venda", error });
+  }
+};
+
+// Atualizar venda
+export const atualizarVenda = async (req, res) => {
+  try {
+    const venda = await Venda.findByPk(req.params.id);
+    if (!venda) return res.status(404).json({ message: "Venda não encontrada" });
+
+    await venda.update(req.body);
+    res.json({ message: "Venda atualizada com sucesso", venda });
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao atualizar venda", error });
+  }
+};
+
+// Excluir venda
+export const excluirVenda = async (req, res) => {
+  try {
+    const venda = await Venda.findByPk(req.params.id);
+    if (!venda) return res.status(404).json({ message: "Venda não encontrada" });
+
+    await venda.destroy();
+    res.json({ message: "Venda excluída com sucesso" });
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao excluir venda", error });
   }
 };
